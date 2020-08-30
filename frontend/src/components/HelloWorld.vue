@@ -1,40 +1,72 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
 
-    <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="textarea"></el-input>
-    <el-row>
-      <el-button type="primary" @click="onSubmit" round>获取结果</el-button>
-    </el-row>
-    <el-row>
-      <p>{{ response }}</p>
-    </el-row>
+<!--    <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="textarea"></el-input>-->
+<!--    <el-row>-->
+<!--      <el-button type="primary" @click="onSubmit" round>获取结果</el-button>-->
+<!--    </el-row>-->
+<!--    <el-row>-->
+<!--      <p>{{ response }}</p>-->
+<!--    </el-row>-->
+
+    <el-upload class="upload-demo" drag action='' :action=action :show-file-list=false
+               :before-upload=beforeUpload :on-success=onSuccess :on-error=onError>
+      <i class="el-icon-upload"></i>
+      <div class="el-upload__text">将excel文件拖到此处，或<em>点击上传</em></div>
+    </el-upload>
+
+    <div v-if="fileUrl !== ''">
+      <el-link type="success" :href="fileUrl">{{fileUrl}}</el-link>
+    </div>
+
+    <Excel ref="excel"></Excel>
   </div>
 </template>
 
 <script>
+  import Excel from "./Excel";
+
   export default {
     name: 'HelloWorld',
+    components: {Excel},
     data() {
       return {
+        action: '/api/hello/post',
         msg: 'Welcome to Your Vue.js App',
         textarea: '',
-        response: ''
+        response: '',
+        fileUrl: ''
       }
     },
     methods: {
       onSubmit() {
-        this.axios.post("/hello/world", {
+        this.axios.post("/api/hello/world", {
           "word": this.textarea
-        }).then(
-          res => {
-            console.log(res.data)
-            this.response = res.data
-          }
-        ).catch(res => {
-          console.log(res.data.res)
+        }).then(res => {
+          console.log(res.data)
+          this.response = res.data
+        }).catch(res => {
+          console.log(res)
         })
+      },
+
+      beforeUpload(file) {
+        console.info('文件 ' + file['name'] + ' 开始本地解析...')
+      },
+      onSuccess(res, file, fileList) {
+        if (res['code'] !== 0) {
+          this.fileUrl = ''
+          this.$message.error('文件 ' + file['name'] + ' 本地解析发生错误：' + res['data'])
+          return
+        }
+
+        this.$message.success('文件 ' + file['name'] + ' 本地解析成功！')
+        this.fileUrl = 'file://' + res['data']
+        this.$refs.excel.listSheetNames(res['data'])
+      },
+      onError(err, file, fileList) {
+        this.$message.error('文件 ' + file['name'] + ' 本地解析发生错误：' + err)
+        this.fileUrl = ''
       }
     }
   }

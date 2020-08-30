@@ -5,6 +5,9 @@ import stat
 from PyInstaller.__main__ import run
 
 if __name__ == '__main__':
+    # 前端打包
+    os.system('cd frontend && npm run build')
+
     # https://blog.csdn.net/u013314786/article/details/103660978
     opts = [
         'backend/app.py',  # 主程序文件
