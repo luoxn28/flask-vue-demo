@@ -31,7 +31,7 @@ def hello_world():
 
 
 # 文件上传 http://docs.jinkan.org/docs/flask/patterns/fileuploads.html
-@app.route('/hello/post', methods=["POST"])
+@app.route('/api/hello/post', methods=["POST"])
 def post():
     file = request.files['file']
     if not file.filename or ('.' not in file.filename) or (file.filename.rsplit('.', 1)[1] not in ('xlsx', 'xls')):
@@ -47,7 +47,7 @@ def post():
 
 
 # 获取excel文件
-@app.route('/hello/sheet/names', methods=["POST"])
+@app.route('/api/hello/sheet/names', methods=["POST"])
 def hello_sheet_names():
     try:
         path = request.json.get('path')
@@ -63,7 +63,7 @@ def hello_sheet_names():
 
 
 # 获取excel文件内容
-@app.route('/hello/sheet/data', methods=["POST"])
+@app.route('/api/hello/sheet/data', methods=["POST"])
 def hello_sheet_data():
     try:
         path = request.json.get('path')
