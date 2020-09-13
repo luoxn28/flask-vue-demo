@@ -1,14 +1,5 @@
 <template>
   <div class="hello">
-
-<!--    <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="textarea"></el-input>-->
-<!--    <el-row>-->
-<!--      <el-button type="primary" @click="onSubmit" round>获取结果</el-button>-->
-<!--    </el-row>-->
-<!--    <el-row>-->
-<!--      <p>{{ response }}</p>-->
-<!--    </el-row>-->
-
     <el-upload class="upload-demo" drag action='' :action=action :show-file-list=false
                :before-upload=beforeUpload :on-success=onSuccess :on-error=onError>
       <i class="el-icon-upload"></i>
@@ -32,24 +23,10 @@
     data() {
       return {
         action: '/api/hello/post',
-        msg: 'Welcome to Your Vue.js App',
-        textarea: '',
-        response: '',
         fileUrl: ''
       }
     },
     methods: {
-      onSubmit() {
-        this.axios.post("/api/hello/world", {
-          "word": this.textarea
-        }).then(res => {
-          console.log(res.data)
-          this.response = res.data
-        }).catch(res => {
-          console.log(res)
-        })
-      },
-
       beforeUpload(file) {
         console.info('文件 ' + file['name'] + ' 开始本地解析...')
       },

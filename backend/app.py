@@ -43,7 +43,7 @@ def post():
     path = os.path.join(base, file.filename)
     file.save(path)
 
-    return {"code": 0, "data": path}
+    return Result.success(path)
 
 
 # 获取excel文件
