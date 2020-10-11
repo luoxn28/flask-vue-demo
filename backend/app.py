@@ -1,11 +1,8 @@
 import os
-import sys
 
 from flask import Flask, render_template, request
-from xlrd import XLRDError
 
 from backend.component.base import excelr
-from backend.component import xls_excelr, xlsx_excelr
 from backend.core import excel
 from backend.dto.result import Result
 
@@ -35,7 +32,7 @@ def hello_world():
 def post():
     file = request.files['file']
     if not file.filename or ('.' not in file.filename) or (file.filename.rsplit('.', 1)[1] not in ('xlsx', 'xls')):
-        return {"code": -1, "data": "上传文件不合法" + file.filename}
+        return Result.fail('上传文件不合法' + file.filename)
 
     base = app.config['UPLOAD_FOLDER']
     if not os.path.exists(base):

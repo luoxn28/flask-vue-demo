@@ -20,5 +20,5 @@ class Result:
         return Result(data=data).to_json()
 
     @staticmethod
-    def fail(code=-1, msg=''):
+    def fail(msg: str, code=-1):
         return Result(code, data={}, msg=msg).to_json()
