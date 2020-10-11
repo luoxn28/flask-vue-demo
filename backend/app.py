@@ -34,7 +34,7 @@ def post():
         return Result.fail(str(e))
 
 
-# 获取excel文件
+# 获取excel文件sheet名列表
 @app.route('/api/hello/sheet/names', methods=["POST"])
 def hello_sheet_names():
     try:

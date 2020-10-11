@@ -1,6 +1,7 @@
 <template>
   <div>
 
+    <!--https://element.eleme.cn/#/zh-CN/component/table-->
     <el-table v-if="dataList.length!==0" :data="dataList" :span-method="excelSpanMethod" border style="width: 100%">
       <!-- 动态生成列 -->
       <el-table-column v-for="(item, index) in headerList" :prop="item" :label="item">

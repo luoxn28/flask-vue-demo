@@ -12,6 +12,7 @@ def read_excel_data(filepath, sheet=None):
         excel = xls_excelr
 
     # 获取单元格列表（合并单元格首格=1，其他为-1，正常的单元格为0）
+    # 结果格式为: [(左上角行, 右下角行, 左上角列, 右下角列)]
     merged_cells_map = {}
     merged_cells = excel.read_sheet_merged_cells(filepath, sheet)
     for v in merged_cells:
@@ -29,8 +30,9 @@ def read_excel_data(filepath, sheet=None):
             if not cache:
                 result_row.append([v, 0])
             else:
-                cache.insert(0, v)
-                result_row.append(cache)
+                vm = list(cache)
+                vm.insert(0, v)
+                result_row.append(vm)
         result.append(result_row)
 
     return result

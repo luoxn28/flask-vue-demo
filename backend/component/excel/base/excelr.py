@@ -30,6 +30,13 @@ def contains_sheet(filepath, sheet):
     return sheet and sheet in read_sheet_names(filepath)
 
 
+# 如果sheet为空则取第一个sheet
+def default_if_null(workbook, sheet):
+    if sheet is None:
+        sheet = workbook.sheet_names()[0]
+    return sheet
+
+
 if __name__ == '__main__':
     print(os.path.basename('/Users/luoxiangnan/PycharmProjects/flask-vue-demo/dist/frontend/static/名单3.xls'))
     print(os.path.basename('名单3.xls'))

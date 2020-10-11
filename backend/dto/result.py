@@ -1,7 +1,4 @@
 # restful返回结果
-import json
-
-
 class Result:
     def __init__(self, code=0, data={}, msg=''):
         self.code = code
