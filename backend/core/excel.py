@@ -1,8 +1,6 @@
-import xlrd
+from backend.component.excel.base import excelr
 
-from backend.component.base import excelr
-
-from backend.component import xls_excelr, xlsx_excelr
+from backend.component.excel import xls_excelr, xlsx_excelr
 
 
 # 读取某个sheet所有内容

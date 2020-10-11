@@ -2,7 +2,7 @@
 
 import xlrd
 
-from backend.component.base.excelr import read_sheet_names
+from backend.component.excel.base.excelr import read_sheet_names
 
 
 # 读取sheet合并单元格信息

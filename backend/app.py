@@ -2,7 +2,8 @@ import os
 
 from flask import Flask, render_template, request
 
-from backend.component.base import excelr
+from backend.utils import file_utils
+from backend.component.excel.base import excelr
 from backend.core import excel
 from backend.dto.result import Result
 
@@ -19,28 +20,18 @@ def index():
     return render_template('index.html')
 
 
-# 接口测试
-@app.route('/hello/world', methods=["POST"])
-def hello_world():
-    text = request.json.get("word")
-    print(text)
-    return 'hello_world ' + text
-
-
-# 文件上传 http://docs.jinkan.org/docs/flask/patterns/fileuploads.html
+# excel文件上传 http://docs.jinkan.org/docs/flask/patterns/fileuploads.html
 @app.route('/api/hello/post', methods=["POST"])
 def post():
-    file = request.files['file']
-    if not file.filename or ('.' not in file.filename) or (file.filename.rsplit('.', 1)[1] not in ('xlsx', 'xls')):
-        return Result.fail('上传文件不合法' + file.filename)
+    try:
+        file = request.files['file']
+        if not excelr.excel_name_legal(file.filename):
+            return Result.fail('上传文件不合法: ' + file.filename)
 
-    base = app.config['UPLOAD_FOLDER']
-    if not os.path.exists(base):
-        os.mkdir(base)
-    path = os.path.join(base, file.filename)
-    file.save(path)
-
-    return Result.success(path)
+        path = file_utils.save(app.config['UPLOAD_FOLDER'], file)
+        return Result.success(path)
+    except Exception as e:
+        return Result.fail(str(e))
 
 
 # 获取excel文件
@@ -49,14 +40,14 @@ def hello_sheet_names():
     try:
         path = request.json.get('path')
         if not excelr.excel_name_legal(path):
-            return Result.fail(msg='参数错误或者文件类型不合法')
+            return Result.fail('参数错误或者文件类型不合法')
         elif not os.path.exists(path):
-            return Result.fail(msg='{} 路径不存在'.format(path))
+            return Result.fail('路径不存在: ' + path)
 
         names = excelr.read_sheet_names(path)
-        return Result.success(data=names)
+        return Result.success(names)
     except Exception as e:
-        return Result.fail(msg=str(e))
+        return Result.fail(str(e))
 
 
 # 获取excel文件内容
@@ -65,18 +56,17 @@ def hello_sheet_data():
     try:
         path = request.json.get('path')
         if not excelr.excel_name_legal(path):
-            return Result.fail(msg='参数错误或者文件类型不合法')
+            return Result.fail('参数错误或者文件类型不合法')
         elif not os.path.exists(path):
-            return Result.fail(msg='{} 路径不存在'.format(path))
+            return Result.fail('路径不存在: ' + path)
 
         sheet = request.json.get('sheet')
-        sheets = excelr.read_sheet_names(path)
-        if not sheet or sheet not in sheets:
-            return Result.fail(msg='{} sheet不存在'.format(sheet))
+        if not excelr.contains_sheet(path, sheet):
+            return Result.fail('sheet不存在: ' + sheet)
 
         return Result.success(excel.read_excel_data(path, sheet))
     except Exception as e:
-        return Result.fail(msg=str(e))
+        return Result.fail(str(e))
 
 
 if __name__ == '__main__':

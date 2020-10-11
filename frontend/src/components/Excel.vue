@@ -39,6 +39,7 @@
         return [1, 1]
       },
 
+      // 获取excel文件sheet名称列表
       listSheetNames(path) {
         this.axios.post("/api/hello/sheet/names", {
           "path": path
@@ -49,13 +50,14 @@
             return
           }
 
-          console.info('sheets ' + res['data'])
+          // 默认展示第一个sheet内容
           this.listSheetData(path, res['data'][0])
         }).catch(res => {
           this.$message.error(res['data']['msg'])
         })
       },
 
+      // 获取excel某个sheet内容
       listSheetData(path, sheet) {
         this.axios.post("/api/hello/sheet/data", {
           "path": path, "sheet": sheet
@@ -78,9 +80,6 @@
             }
             dataList.push(data)
           }
-
-          console.info(headerList)
-          console.info(dataList)
 
           this.dataList = dataList;
           this.headerList = headerList;

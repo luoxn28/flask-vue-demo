@@ -25,6 +25,11 @@ def read_sheet_names(filepath):
     return workbook.sheet_names()
 
 
+# excel文件是否包含该sheet
+def contains_sheet(filepath, sheet):
+    return sheet and sheet in read_sheet_names(filepath)
+
+
 if __name__ == '__main__':
     print(os.path.basename('/Users/luoxiangnan/PycharmProjects/flask-vue-demo/dist/frontend/static/名单3.xls'))
     print(os.path.basename('名单3.xls'))

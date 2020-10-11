@@ -33,13 +33,13 @@
       onSuccess(res, file, fileList) {
         if (res['code'] !== 0) {
           this.fileUrl = ''
-          this.$message.error('文件 ' + file['name'] + ' 本地解析发生错误：' + res['data'])
+          this.$message.error(res['msg'])
           return
         }
 
-        this.$message.success('文件 ' + file['name'] + ' 本地解析成功！')
         this.fileUrl = 'file://' + res['data']
         this.$refs.excel.listSheetNames(res['data'])
+        this.$message.success('文件 ' + file['name'] + ' 本地解析成功！')
       },
       onError(err, file, fileList) {
         this.$message.error('文件 ' + file['name'] + ' 本地解析发生错误：' + err)
