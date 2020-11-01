@@ -4,7 +4,7 @@ from flask import Flask, render_template, request
 
 from backend.utils import file_utils
 from backend.component.excel.base import excelr
-from backend.core import excel
+from backend.core import excel, excel_dict
 from backend.dto.result import Result
 
 app = Flask(__name__,
@@ -28,15 +28,32 @@ def post():
         if not excelr.excel_name_legal(file.filename):
             return Result.fail('上传文件不合法: ' + file.filename)
 
+        # 保存excel文件并加载到内存数据库
         path = file_utils.save(app.config['UPLOAD_FOLDER'], file)
+        excel_dict.load_excel_data(path)
         return Result.success(path)
     except Exception as e:
         return Result.fail(str(e))
 
 
-# 获取excel文件sheet名列表
-@app.route('/api/hello/sheet/names', methods=["POST"])
-def hello_sheet_names():
+@app.route('/api/query/sheet/names', methods=["POST"])
+def query_sheet_names():
+    try:
+        return Result.success(excel_dict.read_sheet_names())
+    except Exception as e:
+        return Result.fail(str(e))
+
+
+@app.route('/api/current/sheet/name', methods=["POST"])
+def current_sheet_name():
+    try:
+        return Result.success(excel_dict.current_sheet_name())
+    except Exception as e:
+        return Result.fail(str(e))
+
+
+@app.route('/api/query/sheet/data', methods=["POST"])
+def query_sheet_data():
     try:
         path = request.json.get('path')
         if not excelr.excel_name_legal(path):
@@ -44,8 +61,12 @@ def hello_sheet_names():
         elif not os.path.exists(path):
             return Result.fail('路径不存在: ' + path)
 
-        names = excelr.read_sheet_names(path)
-        return Result.success(names)
+        sheet = request.json.get('sheet')
+        if not excel_dict.sheet_names or sheet not in excel_dict.sheet_names:
+            return Result.fail('sheet不存在: ' + sheet)
+        lambda_code = request.json.get('lambda')
+
+        return Result.success(excel.query_excel_data(path, sheet, lambda_code))
     except Exception as e:
         return Result.fail(str(e))
 

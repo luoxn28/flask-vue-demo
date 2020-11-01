@@ -21,9 +21,11 @@ def read_excel_data(filepath, sheet=None):
     worksheet = workbook.sheet_by_name(sheet)
 
     data = []
+    type = []
     for i in range(0, worksheet.nrows):
         data.append([worksheet.cell_value(i, j) for j in range(0, worksheet.ncols)])
-    return data
+        type.append([worksheet.cell(i, j).ctype for j in range(0, worksheet.ncols)])
+    return data, type
 
 
 # 读取sheet详细信息（https://www.jianshu.com/p/5d496434ffcf）

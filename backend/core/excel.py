@@ -1,12 +1,32 @@
-from backend.component.excel.base import excelr
+import logging
+import os
 
 from backend.component.excel import xls_excelr, xlsx_excelr
+from backend.component.excel.base import excelr
+from backend.core import excel_dict
+
+
+# 读取数据库中数据，返回
+def query_excel_data(filepath: str, sheet: str, lambda_code: str):
+    if lambda_code:
+        if 'int(v[0])' not in lambda_code:
+            lambda_code = lambda_code.replace('v[0]', 'int(v[0])')
+    logging.info('query_excel_data: {} {} {}'.format(os.path.basename(filepath), sheet, lambda_code))
+    if not excel_dict.excel_filepath or filepath != excel_dict.excel_filepath:
+        raise Exception('当前文件为 {}，请重新加载新文件 {}'
+                        .format(os.path.basename(excel_dict.excel_filepath), os.path.basename(filepath)))
+
+    result = []
+    data = excel_dict.query_by_lambda(sheet, lambda_code)
+    for i, row in enumerate(data):
+        row[0] = str(row[0])  # 对前端展示index为string类型
+        result.append([[v, 0] for v in row])
+    return result
 
 
 # 读取某个sheet所有内容
 def read_excel_data(filepath, sheet=None):
-    type = excelr.excel_file_type(filepath)
-    if type == excelr.XLSX:
+    if excelr.excel_file_type(filepath) == excelr.XLSX:
         excel = xlsx_excelr
     else:
         excel = xls_excelr
@@ -22,7 +42,7 @@ def read_excel_data(filepath, sheet=None):
         merged_cells_map['{}:{}'.format(v[0], v[2])] = [1, v[1] - v[0], v[3] - v[2]]
 
     result = []
-    data = excel.read_excel_data(filepath, sheet)
+    data, type = excel.read_excel_data(filepath, sheet)
     for i, row in enumerate(data):
         result_row = []
         for j, v in enumerate(row):
