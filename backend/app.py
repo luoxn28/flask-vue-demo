@@ -1,6 +1,8 @@
+import logging
 import os
 
 from flask import Flask, render_template, request
+from pandas import DataFrame
 
 from backend.utils import file_utils
 from backend.component.excel.base import excelr
@@ -52,45 +54,49 @@ def current_sheet_name():
         return Result.fail(str(e))
 
 
+# 获取excel文件内容
 @app.route('/api/query/sheet/data', methods=["POST"])
 def query_sheet_data():
     try:
-        path = request.json.get('path')
-        if not excelr.excel_name_legal(path):
-            return Result.fail('参数错误或者文件类型不合法')
-        elif not os.path.exists(path):
-            return Result.fail('路径不存在: ' + path)
-
-        sheet = request.json.get('sheet')
-        if not excel_dict.sheet_names or sheet not in excel_dict.sheet_names:
-            return Result.fail('sheet不存在: ' + sheet)
-        lambda_code = request.json.get('lambda')
-        head_value = request.json.get('head_value')
-
-        return Result.success(excel.query_excel_data(path, sheet, lambda_code, int(head_value)))
-    except Exception as e:
-        return Result.fail(str(e))
-
-
-# 获取excel文件内容
-@app.route('/api/hello/sheet/data', methods=["POST"])
-def hello_sheet_data():
-    try:
-        path = request.json.get('path')
-        if not excelr.excel_name_legal(path):
-            return Result.fail('参数错误或者文件类型不合法')
-        elif not os.path.exists(path):
-            return Result.fail('路径不存在: ' + path)
-
-        sheet = request.json.get('sheet')
-        if not excel_dict.sheet_names or sheet not in excel_dict.sheet_names:
-            return Result.fail('sheet不存在: ' + sheet)
-        head_value = request.json.get('head_value')
-        query_data = request.json.get('query_data')
-
+        path, sheet, query_data, head_value = handle_sheet_data(request)
+        logging.info("query_sheet_data {}:{} {} {}".format(path, sheet, query_data, head_value))
         return Result.success(excel.query_excel_data_by_query_data(path, sheet, query_data, int(head_value)))
     except Exception as e:
+        print(e)
         return Result.fail(str(e))
+
+
+# 下载excel文件内容
+@app.route('/api/download/sheet/data', methods=["POST"])
+def download_sheet_data():
+    try:
+        path, sheet, query_data, head_value = handle_sheet_data(request)
+        logging.info("download_sheet_data {}:{} {} {}".format(path, sheet, query_data, head_value))
+        data = excel.download_excel_data_by_query_data(path, sheet, query_data, int(head_value))
+
+        # 保存excel文件
+        new_path = path[0:path.rindex('.')] + "-download" + path[path.rindex('.'):]
+        logging.info("download_new_path {}".format(new_path))
+        df = DataFrame(data)
+        df.to_excel(new_path, sheet_name=sheet, index=False, header=False)
+        return Result.success(new_path)
+    except Exception as e:
+        return Result.fail(str(e))
+
+
+def handle_sheet_data(req):
+    path = req.json.get('path')
+    if not excelr.excel_name_legal(path):
+        raise Exception('参数错误或者文件类型不合法')
+    elif not os.path.exists(path):
+        raise Exception('路径不存在: ' + path)
+
+    sheet = req.json.get('sheet')
+    if not excel_dict.sheet_names or sheet not in excel_dict.sheet_names:
+        raise Exception('sheet不存在: ' + sheet)
+    query_data = req.json.get('query_data')
+    head_value = req.json.get('head_value')
+    return path, sheet, query_data, head_value
 
 
 if __name__ == '__main__':

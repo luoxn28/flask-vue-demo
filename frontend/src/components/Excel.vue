@@ -1,60 +1,26 @@
 <template>
   <div>
 
-    <div class="block">
-      <el-cascader
-        placeholder="处理策略"
-        v-model="value"
-        :options="options"
-        :props="{ expandTrigger: 'hover'}"
-        :clearable=true
-        @change="handleChange"></el-cascader>
-    </div>
-
-    <!--表头选择 默认前1行为表头行-->
-    <el-row class="row-head" :gutter="5">
-      <el-col :span="6">
-        <div class="head-options">
-          <el-select v-model="head_value" placeholder="请选择文章标签">
-            <el-option v-for="item in head_options" :key="item.value" :label="item.label"
-                       :value="item.value"></el-option>
-          </el-select>
-          <el-tooltip class="item" content="表示表格中前多少行是表头信息" placement="top-start">
-            <i class="el-icon-question"></i>
-          </el-tooltip>
-        </div>
-      </el-col>
-    </el-row>
-
-    <!--选择框-->
-    <el-row :gutter="5">
-      <el-col :span="18">
-        <el-input v-model="input" placeholder="请输入表达式，比如: v[0]>1 and v[0]<10" style="color: red"></el-input>
-      </el-col>
-      <el-col :span="2">
-        <el-button type="primary" icon="el-icon-search" @click="input_click">搜索</el-button>
-      </el-col>
-    </el-row>
-
     <!--查询框-->
     <div class="query-data-div">
-      <el-row :gutter="20">
-        <el-table :data="query_data">
+      <p>处理策略</p>
+      <el-table :data="query_data" :show-header="false" :highlight-current-row="true" :stripe="true">
+        <el-row :gutter="20" type="flex" justify="center">
           <el-table-column>
             <template slot-scope="scope">
               <!--增加/减少输入框-->
               <el-col :span="1">
                 <el-button icon="el-icon-minus" type="info" :disabled="query_data[scope.$index].sub"
-                           @click="del_query_data(scope.$index)"></el-button>
+                           @click="del_query_data(scope.$index)" size="medium" round></el-button>
               </el-col>
-              <el-col :span="1" style="margin-right: 2px;">
+              <el-col :span="1">
                 <el-button icon="el-icon-plus" type="success"
                            :disabled="query_data.length>1 && scope.$index<query_data.length-1"
-                           @click="add_query_data(scope.$index)"></el-button>
+                           @click="add_query_data(scope.$index)" size="medium" round></el-button>
               </el-col>
 
               <!--输入框-->
-              <el-col :span="14">
+              <el-col :span="16">
                 <el-input v-model="query_data[scope.$index].input"
                           :placeholder="query_input_placeholder[query_data[scope.$index].input_type]"></el-input>
               </el-col>
@@ -70,13 +36,31 @@
                   </el-tooltip>
                 </div>
               </el-col>
-
-              <el-col :span="2" v-if="scope.$index===query_data.length-1">
-                <el-button type="primary" icon="el-icon-search" @click="input_click_query_data">搜索</el-button>
-              </el-col>
             </template>
           </el-table-column>
-        </el-table>
+        </el-row>
+      </el-table>
+
+      <el-row :gutter="20" style="margin: 2px">
+        <el-col :span="6">
+          <div class="head-options">
+            <el-select v-model="head_value" placeholder="表示表头信息行数">
+              <el-option v-for="item in head_options" :key="item.value" :label="item.label"
+                         :value="item.value"></el-option>
+            </el-select>
+            <el-tooltip class="item" content="表示表格中前多少行是表头信息" placement="top-start">
+              <i class="el-icon-question"></i>
+            </el-tooltip>
+          </div>
+        </el-col>
+
+        <el-col :span="3">
+          <el-button type="primary" icon="el-icon-search" @click="input_click_query_data">搜索</el-button>
+        </el-col>
+
+        <el-col :span="3">
+          <el-button type="primary" icon="el-icon-search" @click="input_click_download">下载</el-button>
+        </el-col>
       </el-row>
     </div>
 
@@ -112,8 +96,9 @@
         // 查询条件信息
         query_data: [{'sub': true, 'input_type': 0}],
         query_input_placeholder: [
-          '请输入表达式，比如: (v[0]>1 and v[0]<10)',
-          '请输入排序字段，如果排序字段超过1个请以英文逗号分隔，比如: v[1] 或者 v[1], v[2]'
+          '请输入表达式，比如: (v[0]>1 and v[0]<10) or (v[1] + v[2] > 1000)',
+          '请输入正序排序字段，如果排序字段超过1个请以英文逗号分隔，比如: v[1] 或者 v[1], v[2]',
+          '请输入倒序排序字段，如果排序字段超过1个请以英文逗号分隔，比如: v[1] 或者 v[1], v[2]'
         ],
         query_input_options: [
           {value: 0, label: '表达式'},
@@ -121,39 +106,6 @@
           {value: 2, label: '排序 (倒序)'}
         ],
 
-        value: [],
-        options: [
-          {
-            value: 'ziyuan',
-            label: '资源'
-          },
-          {
-            value: 'color',
-            label: '着色',
-            children: [
-              {
-                value: 'font',
-                label: '文本',
-                children: [
-                  {
-                    value: 'blue',
-                    label: '蓝色',
-                  }
-                ]
-              },
-              {
-                value: 'background',
-                label: '背景',
-                children: [
-                  {
-                    value: 'red',
-                    label: '红色',
-                  }
-                ]
-              }
-            ]
-          }
-        ],
         input: '',
         input_enable: false,
 
@@ -169,48 +121,21 @@
       del_query_data(index) {
         this.query_data.splice(index, 1);
       },
+
       input_click_query_data() {
         for (let i = 0; i < this.query_data.length; i++) {
           let value = this.query_data[i]
           if (!value.hasOwnProperty('input') || value['input'] === null || value['input'] === '') {
-            this.$message.error(this.query_data.length === 1 ? '查询条件为空' : '有些查询条件为空')
+            this.$message.error(this.query_data.length === 1 ? '查询条件为空' : '部分查询条件为空')
             return
           }
         }
 
         console.log(this.query_data)
-        this.axios.post("/api/hello/sheet/data", {
-          "path": this.excel_filepath,
-          "sheet": this.excel_sheet,
-          'query_data': this.query_data,
-          'head_value': this.head_value
-        }).then(res => {
-          if ((res = res['data'])['code'] !== 0) {
-            this.$message.error(res['msg'])
-            return
-          }
-
-          console.log(res)
-
-          // 提取表头列表&数据
-          let headerList = [], dataList = []
-          for (const v of res['data'][0]) {
-            headerList.push(v[0])
-          }
-          for (let i = 1; i < res['data'].length; i++) {
-            let data = {}
-            for (let j = 0; j < res['data'][i].length; j++) {
-              data[headerList[j]] = res['data'][i][j]
-            }
-            dataList.push(data)
-          }
-
-          this.dataList = dataList;
-          this.headerList = headerList;
-          this.input_enable = true
-        }).catch(res => {
-          this.$message.error(res)
-        })
+        this.listSheetData(this.excel_filepath, this.excel_sheet, '')
+      },
+      input_click_download() {
+        this.downloadSheetData(this.excel_filepath, this.excel_sheet)
       },
 
       init() {
@@ -234,11 +159,6 @@
         }
 
         console.log(value);
-      },
-
-      input_click() {
-        console.info(this.input)
-        this.listSheetData(this.excel_filepath, this.excel_sheet, this.input)
       },
 
       excelSpanMethod({row, column, rowIndex, columnIndex}) {
@@ -277,10 +197,9 @@
       // 获取excel某个sheet内容
       listSheetData(path, sheet, lambda) {
         this.axios.post("/api/query/sheet/data", {
-          "path": path, "sheet": sheet, 'lambda': lambda, 'head_value': this.head_value
+          "path": path, "sheet": sheet, 'query_data': this.query_data, 'head_value': this.head_value
         }).then(res => {
-          res = res['data']
-          if (res['code'] !== 0) {
+          if ((res = res['data'])['code'] !== 0) {
             this.$message.error(res['msg'])
             return
           }
@@ -307,6 +226,25 @@
         }).catch(res => {
           this.$message.error(res)
         })
+      },
+      downloadSheetData(path, sheet) {
+        this.axios.post("/api/download/sheet/data", {
+          "path": path, "sheet": sheet, 'query_data': this.query_data, 'head_value': this.head_value
+        }).then(res => {
+          if ((res = res['data'])['code'] !== 0) {
+            this.$message.error(res['msg'])
+            return
+          }
+
+          let url = 'file://' + res['data']
+          console.log('download: ' + url)
+          this.$alert('请点击: <a href="' + url + '" _blank>' + url + '</a><hr/>' +
+            '<i>如果点击没反应，请手动复制链接地址，然后以该连接新开一个便签页</i>', 'HTML 片段', {
+            dangerouslyUseHTMLString: true
+          });
+        }).catch(res => {
+          this.$message.error(res)
+        })
       }
     },
 
@@ -317,17 +255,11 @@
 </script>
 
 <style scoped>
-  .row-head {
-    margin-top: 10px;
-    margin-bottom: 10px;
-  }
-
   .head-options {
     color: #409EFF;
   }
 
   .query-data-div {
-
   }
 
   .table-excel {

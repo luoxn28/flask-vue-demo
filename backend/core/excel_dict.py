@@ -102,8 +102,10 @@ def query_by_query_data(sheet: str, query_data: list, head_value=1):
         values = [v for v in sheet_db[sheet][1].values()]
         headers = values[0:head_value]
         values = values[head_value:]
-        values.sort(key=lambda v: v[0])
+        values.sort(key=lambda v: int(v[0]))
         for query in query_data:
+            if ('input' not in query) or ('input_type' not in query):
+                continue
             lambda_code = query['input']
             lambda_type = query['input_type']
             if not lambda_code:

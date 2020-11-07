@@ -45,6 +45,14 @@ def query_excel_data_by_query_data(filepath: str, sheet: str, query_data: list, 
     return result
 
 
+# 执行对应的下载query_data表达式
+def download_excel_data_by_query_data(filepath: str, sheet: str, query_data: list, head_value=1):
+    if not excel_dict.excel_filepath or filepath != excel_dict.excel_filepath:
+        raise Exception('当前文件为 {}，请重新加载新文件 {}'
+                        .format(os.path.basename(excel_dict.excel_filepath), os.path.basename(filepath)))
+    return excel_dict.query_by_query_data(sheet, query_data, head_value)
+
+
 # 读取某个sheet所有内容
 def read_excel_data(filepath, sheet=None):
     if excelr.excel_file_type(filepath) == excelr.XLSX:
