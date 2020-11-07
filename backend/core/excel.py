@@ -7,7 +7,7 @@ from backend.core import excel_dict
 
 
 # 读取数据库中数据，返回
-def query_excel_data(filepath: str, sheet: str, lambda_code: str):
+def query_excel_data(filepath: str, sheet: str, lambda_code: str, head_value=1):
     if lambda_code:
         if 'int(v[0])' not in lambda_code:
             lambda_code = lambda_code.replace('v[0]', 'int(v[0])')
@@ -17,9 +17,30 @@ def query_excel_data(filepath: str, sheet: str, lambda_code: str):
                         .format(os.path.basename(excel_dict.excel_filepath), os.path.basename(filepath)))
 
     result = []
-    data = excel_dict.query_by_lambda(sheet, lambda_code)
+    data = excel_dict.query_by_lambda(sheet, lambda_code, head_value)
+    if data:
+        # 设置列名 v[0] v[1] ...
+        result.append([['v[{}]'.format(v), 0] for v in range(len(data[0]))])
     for i, row in enumerate(data):
-        row[0] = str(row[0])  # 对前端展示index为string类型
+        # 对前端展示index为string类型
+        row[0] = str(row[0])
+        result.append([[v, 0] for v in row])
+    return result
+
+
+# 执行对应的查询query_data表达式
+def query_excel_data_by_query_data(filepath: str, sheet: str, query_data: list, head_value=1):
+    if not excel_dict.excel_filepath or filepath != excel_dict.excel_filepath:
+        raise Exception('当前文件为 {}，请重新加载新文件 {}'
+                        .format(os.path.basename(excel_dict.excel_filepath), os.path.basename(filepath)))
+    result = []
+    data = excel_dict.query_by_query_data(sheet, query_data, head_value)
+    if data:
+        # 设置列名 v[0] v[1] ...
+        result.append([['v[{}]'.format(v), 0] for v in range(len(data[0]))])
+    for i, row in enumerate(data):
+        # 对前端展示index为string类型
+        row[0] = str(row[0])
         result.append([[v, 0] for v in row])
     return result
 

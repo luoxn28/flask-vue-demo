@@ -65,8 +65,9 @@ def query_sheet_data():
         if not excel_dict.sheet_names or sheet not in excel_dict.sheet_names:
             return Result.fail('sheet不存在: ' + sheet)
         lambda_code = request.json.get('lambda')
+        head_value = request.json.get('head_value')
 
-        return Result.success(excel.query_excel_data(path, sheet, lambda_code))
+        return Result.success(excel.query_excel_data(path, sheet, lambda_code, int(head_value)))
     except Exception as e:
         return Result.fail(str(e))
 
@@ -82,10 +83,12 @@ def hello_sheet_data():
             return Result.fail('路径不存在: ' + path)
 
         sheet = request.json.get('sheet')
-        if not excelr.contains_sheet(path, sheet):
+        if not excel_dict.sheet_names or sheet not in excel_dict.sheet_names:
             return Result.fail('sheet不存在: ' + sheet)
+        head_value = request.json.get('head_value')
+        query_data = request.json.get('query_data')
 
-        return Result.success(excel.read_excel_data(path, sheet))
+        return Result.success(excel.query_excel_data_by_query_data(path, sheet, query_data, int(head_value)))
     except Exception as e:
         return Result.fail(str(e))
 

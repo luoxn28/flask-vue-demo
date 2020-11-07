@@ -70,13 +70,13 @@ def load_excel_data(filepath: str):
 
 
 # 执行对应的查询lambda表达式
-def query_by_lambda(sheet: str, lambda_code=None):
+def query_by_lambda(sheet: str, lambda_code=None, head_value=1):
     try:
         if lambda_code:
-            lambda_code = 'lambda v: {}'.format(lambda_code)
+            lambda_code = 'lambda v: int(v[0])>{} and {}'.format(head_value, lambda_code)
         else:
-            lambda_code = 'lambda v: int(v[0])>0'
-        logging.info("query_by_lambda {} {}({})".format(sheet, lambda_code, type(lambda_code)))
+            lambda_code = 'lambda v: int(v[0])>{}'.format(head_value)
+        logging.info("query_by_lambda {} {} ({})".format(sheet, lambda_code, type(lambda_code)))
         if not excel_filepath:
             raise Exception('未加载任何excel文件')
         if sheet not in sheet_db:
@@ -84,7 +84,46 @@ def query_by_lambda(sheet: str, lambda_code=None):
 
         func = eval(lambda_code)
         db = sheet_db[sheet][1]
-        return [v for v in db.values() if func(v)]
+        return [v for v in db.values() if (int(v[0]) <= head_value) or (func(v))]
+        # return [v for v in db.values() if func(v)]
+    except Exception as e:
+        print(e)
+        raise e
+
+
+# 执行对应的查询query_data表达式
+def query_by_query_data(sheet: str, query_data: list, head_value=1):
+    if not excel_filepath:
+        raise Exception('未加载任何excel文件')
+    if sheet not in sheet_db:
+        raise Exception('sheet:{} 在文件{}中未找到'.format(sheet, os.path.basename(excel_filepath)))
+
+    try:
+        values = [v for v in sheet_db[sheet][1].values()]
+        headers = values[0:head_value]
+        values = values[head_value:]
+        values.sort(key=lambda v: v[0])
+        for query in query_data:
+            lambda_code = query['input']
+            lambda_type = query['input_type']
+            if not lambda_code:
+                continue
+
+            if lambda_type == 0:  # 表达式
+                if 'int(v[0])' not in lambda_code:
+                    lambda_code = lambda_code.replace('v[0]', 'int(v[0])')
+                lambda_code = 'lambda v: {}'.format(lambda_code)
+                logging.info("query_by_lambda {} {} ({})".format(sheet, lambda_code, type(lambda_code)))
+                func = eval(lambda_code)
+                values = [v for v in values if func(v)]
+            elif lambda_type == 1 or lambda_type == 2:  # 排序 1:正序 2:倒序
+                if 'v[0]' not in lambda_code:
+                    lambda_code = lambda_code + ',v[0]'
+                lambda_code = 'lambda v: ({})'.format(lambda_code)
+                logging.info("query_by_sort {} {} ({})".format(sheet, lambda_code, type(lambda_code)))
+                values = sorted(values, key=eval(lambda_code), reverse=False if lambda_type == 1 else True)
+
+        return headers + values
     except Exception as e:
         print(e)
         raise e
@@ -95,19 +134,24 @@ if __name__ == '__main__':
     load_excel_data('/Users/luoxiangnan/PycharmProjects/flask-vue-demo/uploads/名单222.xlsx')
     print(read_sheet_names())
     print(current_sheet_name())
+    print()
 
     try:
-        # lambda_code = """lambda v: 1 < v[0] < 10 and v[4] > 5 and v[5] < 20 and (v[4] + v[5] > 16)"""
-        lambda_code = """lambda v: v[0]>1"""
-        print(type(lambda_code))
-        print(query_by_lambda('Sheet0', lambda_code))
+        for v in query_by_query_data('Sheet0', [
+            {'input': 'v[0]<10', 'input_type': 0},
+            {'input': 'v[4]', 'input_type': 1}
+        ]):
+            print(v)
     except Exception as e:
-        print(str(e))
+        print(e)
 
-    # try:
-    #     print(query_by_lambda('Sheet0'))
-    # except Exception as e:
-    #     print(e)
+# try:
+#     # lambda_code = """lambda v: 1 < v[0] < 10 and v[4] > 5 and v[5] < 20 and (v[4] + v[5] > 16)"""
+#     lambda_codes = """v[0]<10 and v[4]>1"""
+#     for v in query_by_lambda('Sheet0', lambda_code=lambda_codes):
+#         print(v)
+# except Exception as e:
+#     print(str(e))
 
 # namespace = {}
 # code = """def hellocute(xx):
