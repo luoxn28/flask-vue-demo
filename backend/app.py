@@ -78,6 +78,7 @@ def download_sheet_data():
         new_path = path[0:path.rindex('.')] + "-download" + path[path.rindex('.'):]
         logging.info("download_new_path {}".format(new_path))
         df = DataFrame(data)
+        df = df.iloc[:, 1:]
         df.to_excel(new_path, sheet_name=sheet, index=False, header=False)
         return Result.success(new_path)
     except Exception as e:

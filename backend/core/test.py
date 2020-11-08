@@ -3,6 +3,8 @@ from operator import itemgetter
 import openpyxl
 
 from pandas import DataFrame
+import pandas as pd
+from pandas._libs.tslibs.timestamps import Timestamp
 
 data = [
     [1, '张三', 12, '综合早教1'],
@@ -10,9 +12,21 @@ data = [
     [2, '张三', 19, '综合早教2']]
 # data.sort(key=lambda v: (v[0]))
 
-path = '/Users/luoxiangnan/PycharmProjects/flask-vue-demo/uploads/名单222.xlsx'
-print(path[0:path.rindex('.')] + "-download")
-print(path[path.rindex('.'):])
+df = DataFrame(data)
+print(df.iloc[:, 1:])
+
+# path = '/Users/luoxiangnan/PycharmProjects/flask-vue-demo/uploads/名单222 (1).xlsx'
+# path = '/Users/luoxiangnan/PycharmProjects/flask-vue-demo/uploads/名单222.xlsx'
+# df = pd.read_excel(path, header=0)
+# for row in df.values:
+#     for item in row:
+#         if isinstance(item, Timestamp):
+#             print(item.strftime("%Y-%m-%d %H:%M:%S"), end=' ')
+#         else:
+#             print(item, end=' ')
+#     print()
+
+# df.to_excel('zzz.xlsx', sheet_name='Sheet1', index=False)
 
 # func = eval("lambda v: (v[2])")
 # data.sort(key=func)
@@ -24,7 +38,7 @@ print(path[path.rindex('.'):])
 #     for i in item:
 #         print(i)
 
-# df = DataFrame(data)
+
 # df = df.sort_values(0)
 # df.apply(lambda x:x['v'])
 

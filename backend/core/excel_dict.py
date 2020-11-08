@@ -3,6 +3,8 @@
 """
 import logging
 import os
+import pandas as pd
+from pandas._libs.tslibs.timestamps import Timestamp
 
 from backend.component.excel import xlsx_excelr, xls_excelr
 from backend.component.excel.base import excelr
@@ -58,37 +60,23 @@ def load_excel_data(filepath: str):
         sheet_db[name] = [merged_cells, {}]
         sheet_db_type[name] = {}
         data_cells, type_cells = excel.read_excel_data(filepath, name)
+
+        df = pd.read_excel(filepath, name)
+        df_data_cells = df.values
         for i, data in enumerate(data_cells):
-            data.insert(0, i + 1)
-            sheet_db[name][1][i + 1] = data
+            if i == 0:
+                data.insert(0, i + 1)
+                sheet_db[name][1][i + 1] = data
+            else:
+                df_row = list(df_data_cells[i - 1])
+                df_row.insert(0, i + 1)
+                sheet_db[name][1][i + 1] = [v if not pd.isna(v) else '' for v in df_row]
         for i, types in enumerate(type_cells):
             types.insert(0, 0)
             sheet_db_type[name][i + 1] = types
 
     logging.info('完成加载文件 {}, sheet_names:{}'.format(os.path.basename(filepath), sheet_names))
     return
-
-
-# 执行对应的查询lambda表达式
-def query_by_lambda(sheet: str, lambda_code=None, head_value=1):
-    try:
-        if lambda_code:
-            lambda_code = 'lambda v: int(v[0])>{} and {}'.format(head_value, lambda_code)
-        else:
-            lambda_code = 'lambda v: int(v[0])>{}'.format(head_value)
-        logging.info("query_by_lambda {} {} ({})".format(sheet, lambda_code, type(lambda_code)))
-        if not excel_filepath:
-            raise Exception('未加载任何excel文件')
-        if sheet not in sheet_db:
-            raise Exception('sheet:{} 在文件{}中未找到'.format(sheet, os.path.basename(excel_filepath)))
-
-        func = eval(lambda_code)
-        db = sheet_db[sheet][1]
-        return [v for v in db.values() if (int(v[0]) <= head_value) or (func(v))]
-        # return [v for v in db.values() if func(v)]
-    except Exception as e:
-        print(e)
-        raise e
 
 
 # 执行对应的查询query_data表达式
@@ -125,7 +113,12 @@ def query_by_query_data(sheet: str, query_data: list, head_value=1):
                 logging.info("query_by_sort {} {} ({})".format(sheet, lambda_code, type(lambda_code)))
                 values = sorted(values, key=eval(lambda_code), reverse=False if lambda_type == 1 else True)
 
-        return headers + values
+        result = headers + values
+        for row in result:
+            for i, item in enumerate(row):
+                if isinstance(item, Timestamp):
+                    row[i] = item.strftime("%Y-%m-%d %H:%M:%S")
+        return result
     except Exception as e:
         print(e)
         raise e
@@ -138,14 +131,17 @@ if __name__ == '__main__':
     print(current_sheet_name())
     print()
 
-    try:
-        for v in query_by_query_data('Sheet0', [
-            {'input': 'v[0]<10', 'input_type': 0},
-            {'input': 'v[4]', 'input_type': 1}
-        ]):
-            print(v)
-    except Exception as e:
-        print(e)
+    print(sheet_db)
+    print(sheet_db_type)
+
+    # try:
+    #     for v in query_by_query_data('Sheet0', [
+    #         {'input': 'v[0]<10', 'input_type': 0},
+    #         {'input': 'v[4]', 'input_type': 1}
+    #     ]):
+    #         print(v)
+    # except Exception as e:
+    #     print(e)
 
 # try:
 #     # lambda_code = """lambda v: 1 < v[0] < 10 and v[4] > 5 and v[5] < 20 and (v[4] + v[5] > 16)"""

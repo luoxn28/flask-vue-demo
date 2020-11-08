@@ -66,7 +66,7 @@
 
     <!--https://element.eleme.cn/#/zh-CN/component/table-->
     <el-table class="table-excel" v-if="dataList.length!==0" :data="dataList" :span-method="excelSpanMethod" border
-              style="width: 100%">
+              style="width: 100%" stripe>
       <!-- 动态生成列 -->
       <el-table-column v-for="(item, index) in headerList" :prop="item" :label="item">
         <template slot-scope="scope">
