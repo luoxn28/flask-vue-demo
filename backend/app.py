@@ -85,6 +85,7 @@ def download_sheet_data():
         return Result.fail(str(e))
 
 
+@app.route('/api/private/sheet/data', methods=["POST"])
 def handle_sheet_data(req):
     path = req.json.get('path')
     if not excelr.excel_name_legal(path):

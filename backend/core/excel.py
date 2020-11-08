@@ -1,4 +1,3 @@
-import logging
 import os
 
 from backend.component.excel import xls_excelr, xlsx_excelr
